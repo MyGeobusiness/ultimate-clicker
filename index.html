@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>Ultimate Clicker</title>
+</head>
+<body>
+
+<h1>Ultimate Clicker</h1>
+<h2 id="cookies">0 Cookies</h2>
+<p id="cps">0 CPS</p>
+<p id="multiplier">x1</p>
+
+<button onclick="clickCookie(event)">CLICK</button>
+<button onclick="toggleSidebar()">Upgrades</button>
+
+<div id="sidebar">
+  <h3>Buildings</h3>
+  <div id="buildings"></div>
+
+  <h3>Click Upgrade</h3>
+  <button onclick="upgradeClick()">Upgrade Click</button>
+  <p id="clickCost"></p>
+
+  <h3>Prestige</h3>
+  <button onclick="prestige()">Prestige Reset</button>
+
+  <h3>Achievements</h3>
+  <ul id="achievements"></ul>
+
+  <h3>Leaderboard</h3>
+  <input id="name" placeholder="Your name"><br><br>
+  <button onclick="submitScore()">Submit Score</button>
+  <ol id="leaderboard"></ol>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
