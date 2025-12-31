@@ -1,0 +1,46 @@
+body {
+  background:#111;
+  color:white;
+  font-family:Arial, sans-serif;
+  text-align:center;
+  margin:0;
+  padding:20px;
+}
+
+button {
+  padding:10px 16px;
+  margin:5px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+#sidebar {
+  position:fixed;
+  right:0;
+  top:0;
+  width:90%;
+  max-width:320px;
+  background:#222;
+  height:100%;
+  display:none;
+  overflow:auto;
+  padding:15px;
+  border-left:2px solid #444;
+}
+
+.float {
+  position:absolute;
+  color:gold;
+  font-weight:bold;
+  animation:float 1s ease-out;
+}
+
+@keyframes float {
+  to { transform:translateY(-40px); opacity:0; }
+}
+
+input {
+  width:90%;
+  padding:6px;
+  margin-bottom:8px;
+}
