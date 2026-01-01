@@ -1,39 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Clicker Game</title>
 <link rel="stylesheet" href="style.css">
-<title>Ultimate Clicker</title>
 </head>
 <body>
+<div class="game-container">
+    <header>
+        <h1>Ultimate Clicker</h1>
+        <div id="cookie-counter">Cookies: 0</div>
+        <div id="cps-counter">CPS: 0 | Click x1</div>
+        <button id="prestige-btn">Prestige</button>
+    </header>
 
-<h1>Ultimate Clicker</h1>
-<h2 id="cookies">0 Cookies</h2>
-<p id="cps">0 CPS</p>
-<p id="multiplier">x1</p>
+    <section class="cookie-area">
+        <img src="https://i.ibb.co/Th0f8Kx/cookie.png" id="cookie-btn" alt="Cookie">
+        <div id="floating-text-container"></div>
+        <audio id="click-sound" src="click.mp3"></audio>
+        <audio id="purchase-sound" src="purchase.mp3"></audio>
+        <audio id="achievement-sound" src="achievement.mp3"></audio>
+    </section>
 
-<button onclick="clickCookie(event)">CLICK</button>
-<button onclick="toggleSidebar()">Upgrades</button>
+    <section class="panels">
+        <div class="panel" id="buildings-panel">
+            <h2>Buildings</h2>
+            <div id="buildings-list"></div>
+        </div>
 
-<div id="sidebar">
-  <h3>Buildings</h3>
-  <div id="buildings"></div>
+        <div class="panel" id="upgrades-panel">
+            <h2>Upgrades</h2>
+            <button id="click-upgrade-btn">Upgrade Click</button>
+        </div>
 
-  <h3>Click Upgrade</h3>
-  <button onclick="upgradeClick()">Upgrade Click</button>
-  <p id="clickCost"></p>
+        <div class="panel" id="achievements-panel">
+            <h2>Achievements</h2>
+            <ul id="achievements-list"></ul>
+        </div>
 
-  <h3>Prestige</h3>
-  <button onclick="prestige()">Prestige Reset</button>
-
-  <h3>Achievements</h3>
-  <ul id="achievements"></ul>
-
-  <h3>Leaderboard</h3>
-  <input id="name" placeholder="Your name"><br><br>
-  <button onclick="submitScore()">Submit Score</button>
-  <ol id="leaderboard"></ol>
+        <div class="panel" id="leaderboard-panel">
+            <h2>Leaderboard</h2>
+            <input type="text" id="player-name" placeholder="Enter name">
+            <button id="submit-score-btn">Submit Score</button>
+            <ul id="leaderboard-list"></ul>
+        </div>
+    </section>
 </div>
+<script src="game.js"></script>
+</body>
+</html>
+
 
 <script src="game.js"></script>
 </body>
