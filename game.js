@@ -5,7 +5,7 @@ const cookieBtn = document.getElementById("cookie-btn");
 const cookieCounter = document.getElementById("cookie-counter");
 const cpsCounter = document.getElementById("cps-counter");
 const buildingsList = document.getElementById("buildings-list");
-const clickUpgradeBtn = document.getElementById("click-upgrade-btn");
+const upgradesList = document.getElementById("upgrades-list");
 const prestigeBtn = document.getElementById("prestige-btn");
 const floatingTextContainer = document.getElementById("floating-text-container");
 const achievementsList = document.getElementById("achievements-list");
@@ -18,11 +18,26 @@ const achievementSound = document.getElementById("achievement-sound");
 
 let userid="player1";
 
+// --- Buildings ---
+const iconList = ["🖱️","🌾","🏭","⛏️","🔬","🛰️","🤖","🏰","🛳️","🚀","🏗️","⚡"];
 const buildings = [];
 for(let i=1;i<=50;i++){
-    buildings.push({name:`Building ${i}`, baseCost: Math.pow(10, Math.floor(i/5)+1), cps: Math.pow(10,Math.floor(i/5))});
+    const baseCPS = Math.pow(10, Math.floor(i/5));
+    const baseCost = Math.pow(10, Math.floor(i/5)+1);
+    const icon = iconList[(i-1) % iconList.length]; 
+    buildings.push({name:`Building ${i}`, baseCost, cps: baseCPS, icon});
 }
 
+// --- Upgrades ---
+const upgrades = [
+    {name:"Click Power +1", cost:50, effect:()=>save.clickPower+=1, icon:"⚡"},
+    {name:"Click Power +2", cost:200, effect:()=>save.clickPower+=2, icon:"⚡"},
+    {name:"Auto Clicker +1 CPS", cost:500, effect:()=>save.cps+=1, icon:"🤖"},
+    {name:"Golden Cookie", cost:1000, effect:()=>save.cookies+=100, icon:"🍪"},
+    {name:"Multiplier Boost", cost:2500, effect:()=>save.multiplier+=0.5, icon:"✨"}
+];
+
+// --- Achievements ---
 const achievements = [
     {name:"First 100 Cookies", condition:s=>s.totalCookies>=100, unlocked:false},
     {name:"1K Cookies", condition:s=>s.totalCookies>=1000, unlocked:false},
@@ -30,10 +45,12 @@ const achievements = [
     {name:"First Prestige", condition:s=>s.prestige>=1, unlocked:false},
 ];
 
+// --- Helpers ---
 function updateDisplay(){
     cookieCounter.innerText=`Cookies: ${Math.floor(save.cookies)}`;
     cpsCounter.innerText=`CPS: ${save.cps} | Click x${save.clickPower * save.multiplier}`;
     renderBuildings();
+    renderUpgrades();
     renderAchievements();
 }
 
@@ -53,9 +70,9 @@ function renderBuildings(){
         const b=buildings[i];
         const owned=save.buildings[b.name]||0;
         const cost=Math.floor(b.baseCost*Math.pow(1.15,owned));
+        if(i>0 && (save.buildings[buildings[i-1].name]||0)==0) continue;
         const btn=document.createElement("button");
-        btn.innerText=`${b.name} (Cost: ${cost}) CPS: ${b.cps} Owned: ${owned}`;
-        btn.disabled=i>0 && (save.buildings[buildings[i-1].name]||0)==0;
+        btn.innerHTML=`<span>${b.icon}</span> ${b.name} (Cost: ${cost}) CPS: ${b.cps} Owned: ${owned}`;
         btn.onclick=()=>buyBuilding(i);
         buildingsList.appendChild(btn);
     }
@@ -76,6 +93,29 @@ function buyBuilding(index){
     }
 }
 
+// --- Upgrades ---
+function renderUpgrades(){
+    upgradesList.innerHTML="";
+    for(let i=0;i<upgrades.length;i++){
+        const u=upgrades[i];
+        if(i>0 && !upgrades[i-1].purchased) continue;
+        const btn=document.createElement("button");
+        btn.innerHTML=`<span>${u.icon}</span> ${u.name} (Cost: ${u.cost})`;
+        btn.onclick=()=>{
+            if(save.cookies>=u.cost){
+                save.cookies-=u.cost;
+                u.effect();
+                u.purchased=true;
+                createFloatingText(`Upgrade!`,"purple");
+                purchaseSound.play();
+                saveToWorker();
+                updateDisplay();
+            }
+        };
+        upgradesList.appendChild(btn);
+    }
+}
+
 // --- Click ---
 cookieBtn.onclick=()=>{
     const amount=save.clickPower*save.multiplier;
@@ -87,24 +127,13 @@ cookieBtn.onclick=()=>{
     updateDisplay();
 }
 
-// --- Click Upgrade ---
-clickUpgradeBtn.onclick=()=>{
-    const cost=50*Math.pow(2,save.clickPower-1);
-    if(save.cookies>=cost){
-        save.cookies-=cost;
-        save.clickPower+=1;
-        purchaseSound.play();
-        saveToWorker();
-        updateDisplay();
-    }
-}
-
 // --- Prestige ---
 prestigeBtn.onclick=()=>{
     if(save.totalCookies>=100000){
         save.prestige+=1;
         save.multiplier=1+0.5*save.prestige;
         save.cookies=0; save.totalCookies=0; save.cps=0; save.clickPower=1; save.buildings={};
+        upgrades.forEach(u=>u.purchased=false);
         saveToWorker(); updateDisplay();
         createFloatingText("Prestige!", "blue");
         achievementSound.play();
