@@ -1,45 +1,106 @@
 body {
-  background:#111;
-  color:white;
-  font-family:Arial, sans-serif;
-  text-align:center;
-  margin:0;
-  padding:20px;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom, #f0f0f5, #d0d0e0);
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.game-container {
+    max-width: 950px;
+    width: 100%;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.cookie-area {
+    position: relative;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#cookie-btn {
+    width: 180px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+#cookie-btn:active {
+    transform: scale(0.9) rotate(-10deg);
+}
+
+#floating-text-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.panels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.panel {
+    background: linear-gradient(135deg, #fff, #e0e0ff);
+    padding: 12px;
+    flex: 1 1 220px;
+    min-width: 220px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+
+.panel:hover {
+    transform: translateY(-3px);
 }
 
 button {
-  padding:10px 16px;
-  margin:5px;
-  font-size:16px;
-  cursor:pointer;
+    cursor: pointer;
+    padding: 6px 12px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 6px;
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    transition: transform 0.1s, background-color 0.2s;
 }
 
-#sidebar {
-  position:fixed;
-  right:0;
-  top:0;
-  width:90%;
-  max-width:320px;
-  background:#222;
-  height:100%;
-  display:none;
-  overflow:auto;
-  padding:15px;
-  border-left:2px solid #444;
+button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
 }
 
-.float {
-  position:absolute;
-  color:gold;
-  font-weight:bold;
-  animation:float 1s ease-out;
+#buildings-list button {
+    width: 100%;
+    margin-bottom: 4px;
 }
 
-@keyframes float {
-  to { transform:translateY(-40px); opacity:0; }
+#achievements-list li, #leaderboard-list li {
+    list-style: none;
+    margin-bottom: 3px;
 }
 
-input {
+/* Floating Text Animation */
+.floating-text {
+    position: absolute;
+    font-weight: bold;
+    color: orange;
+    font-size: 18px;
+    animation: floatUp 1s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-60px); opacity: 0; }
+}
+
   width:90%;
   padding:6px;
   margin-bottom:8px;
