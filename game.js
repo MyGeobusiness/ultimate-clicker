@@ -16,13 +16,15 @@ const submitScoreBtn = document.getElementById("submit-score-btn");
 let userid="player1";
 
 // --- Buildings ---
-const buildingIcons = ["🖱️","🌾","🏭","⛏️","🔬","🛰️","🤖","🏰","🛳️","🚀"];
+// 50 placeholder PNG icons (replace with unique URLs)
+const buildingIcons = Array.from({length:50},(_,i)=>`https://upload.wikimedia.org/wikipedia/commons/6/6b/Cookie_icon.png`);
+
 const buildings = [];
 for(let i=1;i<=50;i++){
     const baseCPS = i*2;
     const baseCost = i*100;
-    const icon = buildingIcons[(i-1)%buildingIcons.length];
-    buildings.push({name:`Building ${i}`, baseCost, cps: baseCPS, icon});
+    const icon = buildingIcons[i-1];
+    buildings.push({name:`Building ${i}`, baseCost, cps:baseCPS, icon});
 }
 
 // --- Upgrades ---
@@ -70,7 +72,7 @@ function renderBuildings(){
         const cost=Math.floor(b.baseCost*Math.pow(1.15,owned));
         if(i>0 && (save.buildings[buildings[i-1].name]||0)==0) continue;
         const btn=document.createElement("button");
-        btn.innerHTML=`<span>${b.icon}</span> ${b.name} (Cost: ${cost}) CPS: ${b.cps} Owned: ${owned}`;
+        btn.innerHTML=`<img src="${b.icon}" style="width:24px;vertical-align:middle;"> ${b.name} (Cost: ${cost}) CPS: ${b.cps} Owned: ${owned}`;
         btn.onclick=()=>buyBuilding(i);
         buildingsList.appendChild(btn);
     }
@@ -133,6 +135,8 @@ prestigeBtn.onclick=()=>{
         updateDisplay();
         createFloatingText("Prestige!", "blue");
         saveToWorker();
+    } else {
+        alert("Need at least 100,000 cookies to prestige");
     }
 }
 
@@ -152,24 +156,33 @@ function renderAchievements(){
 
 // --- Leaderboard ---
 submitScoreBtn.onclick=async ()=>{
-    const name=playerNameInput.value||"Anonymous";
-    await fetch(`${WORKER_URL}/api/leaderboard?userid=${userid}`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({name})
-    });
+    const name = playerNameInput.value || "Anonymous";
+    const payload = {name, score: save.totalCookies};
+    try {
+        await fetch(`${WORKER_URL}/api/leaderboard?userid=${userid}`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+        });
+    } catch{
+        console.warn("Leaderboard submission failed");
+    }
     loadLeaderboard();
 }
 
 async function loadLeaderboard(){
-    const res=await fetch(`${WORKER_URL}/api/leaderboard?userid=${userid}`);
-    const data=await res.json();
-    leaderboardList.innerHTML="";
-    data.forEach((entry,i)=>{
-        const li=document.createElement("li");
-        li.innerText=`${i+1}. ${entry.name} - ${entry.score}`;
-        leaderboardList.appendChild(li);
-    });
+    try{
+        const res = await fetch(`${WORKER_URL}/api/leaderboard?userid=${userid}`);
+        const data = await res.json();
+        leaderboardList.innerHTML = "";
+        data.forEach((entry,i)=>{
+            const li=document.createElement("li");
+            li.innerText=`${i+1}. ${entry.name} - ${entry.score}`;
+            leaderboardList.appendChild(li);
+        });
+    } catch{
+        console.warn("Leaderboard load failed");
+    }
 }
 
 // --- Worker Save ---
@@ -180,10 +193,10 @@ async function saveToWorker(){
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(save)
         });
-        localStorage.setItem("clickerSave", JSON.stringify(save));
     } catch {
-        localStorage.setItem("clickerSave", JSON.stringify(save));
+        console.warn("Worker save failed, using localStorage");
     }
+    localStorage.setItem("clickerSave", JSON.stringify(save));
 }
 
 async function loadFromWorker(){
@@ -193,10 +206,12 @@ async function loadFromWorker(){
             const data = await res.json();
             save = data || save;
         } else {
+            console.warn("Worker load failed, using localStorage");
             const local = localStorage.getItem("clickerSave");
             if(local) save = JSON.parse(local);
         }
     } catch {
+        console.warn("Worker load failed, using localStorage");
         const local = localStorage.getItem("clickerSave");
         if(local) save = JSON.parse(local);
     }
@@ -213,3 +228,4 @@ setInterval(()=>{
 
 // --- Initialize ---
 loadFromWorker();
+
