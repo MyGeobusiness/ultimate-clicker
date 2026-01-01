@@ -12,9 +12,6 @@ const achievementsList = document.getElementById("achievements-list");
 const leaderboardList = document.getElementById("leaderboard-list");
 const playerNameInput = document.getElementById("player-name");
 const submitScoreBtn = document.getElementById("submit-score-btn");
-const clickSound = document.getElementById("click-sound");
-const purchaseSound = document.getElementById("purchase-sound");
-const achievementSound = document.getElementById("achievement-sound");
 
 let userid="player1";
 
@@ -22,20 +19,23 @@ let userid="player1";
 const iconList = ["🖱️","🌾","🏭","⛏️","🔬","🛰️","🤖","🏰","🛳️","🚀","🏗️","⚡"];
 const buildings = [];
 for(let i=1;i<=50;i++){
-    const baseCPS = Math.pow(10, Math.floor(i/5));
-    const baseCost = Math.pow(10, Math.floor(i/5)+1);
+    const baseCPS = i*2; // different CPS per building
+    const baseCost = i*100; // different cost
     const icon = iconList[(i-1) % iconList.length]; 
     buildings.push({name:`Building ${i}`, baseCost, cps: baseCPS, icon});
 }
 
 // --- Upgrades ---
 const upgrades = [
-    {name:"Click Power +1", cost:50, effect:()=>save.clickPower+=1, icon:"⚡"},
-    {name:"Click Power +2", cost:200, effect:()=>save.clickPower+=2, icon:"⚡"},
-    {name:"Auto Clicker +1 CPS", cost:500, effect:()=>save.cps+=1, icon:"🤖"},
-    {name:"Golden Cookie", cost:1000, effect:()=>save.cookies+=100, icon:"🍪"},
-    {name:"Multiplier Boost", cost:2500, effect:()=>save.multiplier+=0.5, icon:"✨"}
+    {name:"Click Power +1", baseCost:50, effect:()=>save.clickPower+=1, icon:"⚡"},
+    {name:"Click Power +2", baseCost:200, effect:()=>save.clickPower+=2, icon:"⚡"},
+    {name:"Auto Clicker +1 CPS", baseCost:500, effect:()=>save.cps+=1, icon:"🤖"},
+    {name:"Golden Cookie", baseCost:1000, effect:()=>save.cookies+=100, icon:"🍪"},
+    {name:"Multiplier Boost", baseCost:2500, effect:()=>save.multiplier+=0.5, icon:"✨"}
 ];
+
+// Track purchased upgrades cost increase
+upgrades.forEach(u => u.cost = u.baseCost);
 
 // --- Achievements ---
 const achievements = [
@@ -87,9 +87,8 @@ function buyBuilding(index){
         save.buildings[b.name]=owned+1;
         save.cps+=b.cps;
         createFloatingText(`+${b.cps} CPS`,"green");
-        purchaseSound.play();
-        saveToWorker();
         updateDisplay();
+        saveToWorker();
     }
 }
 
@@ -100,16 +99,16 @@ function renderUpgrades(){
         const u=upgrades[i];
         if(i>0 && !upgrades[i-1].purchased) continue;
         const btn=document.createElement("button");
-        btn.innerHTML=`<span>${u.icon}</span> ${u.name} (Cost: ${u.cost})`;
+        btn.innerHTML=`<span>${u.icon}</span> ${u.name} (Cost: ${Math.floor(u.cost)})`;
         btn.onclick=()=>{
             if(save.cookies>=u.cost){
                 save.cookies-=u.cost;
                 u.effect();
                 u.purchased=true;
+                u.cost *= 2; // cost doubles after purchase
                 createFloatingText(`Upgrade!`,"purple");
-                purchaseSound.play();
-                saveToWorker();
                 updateDisplay();
+                saveToWorker();
             }
         };
         upgradesList.appendChild(btn);
@@ -122,9 +121,8 @@ cookieBtn.onclick=()=>{
     save.cookies+=amount;
     save.totalCookies+=amount;
     createFloatingText(`+${amount}`,"yellow");
-    clickSound.play();
-    saveToWorker();
     updateDisplay();
+    saveToWorker();
 }
 
 // --- Prestige ---
@@ -133,10 +131,10 @@ prestigeBtn.onclick=()=>{
         save.prestige+=1;
         save.multiplier=1+0.5*save.prestige;
         save.cookies=0; save.totalCookies=0; save.cps=0; save.clickPower=1; save.buildings={};
-        upgrades.forEach(u=>u.purchased=false);
-        saveToWorker(); updateDisplay();
+        upgrades.forEach(u=>{u.purchased=false; u.cost = u.baseCost;});
+        updateDisplay();
         createFloatingText("Prestige!", "blue");
-        achievementSound.play();
+        saveToWorker();
     }
 }
 
@@ -147,7 +145,6 @@ function renderAchievements(){
         if(!a.unlocked && a.condition(save)){
             a.unlocked=true;
             createFloatingText(`Achievement: ${a.name}`,"purple");
-            achievementSound.play();
         }
         const li=document.createElement("li");
         li.innerText=`${a.name} ${a.unlocked?"✓":""}`;
